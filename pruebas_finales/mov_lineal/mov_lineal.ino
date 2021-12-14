@@ -7,53 +7,11 @@ const int pin_rueda_IZQ = 6;
 const int IR_IZQ = 11;
 const int IR_DER = 10;
 
-long t; //timepo que demora en llegar el eco
-long d; //distancia en centimetros
+long time_eco; //timepo que demora en llegar el eco
+long dist; //distancia en centimetros
 
 Servo myservoD;
 Servo myservoI;
-
-
-void sendspeed(int speed)
-{
-  // MAX SPEED      = 10
-  // MAX SPEED NEG  = -10
-  int max_s = 253;
-  int min_s = 1;
-  int speed_0 = 100;
-  int max = 10;
-  int min = -10;
-
-  int vel_izq,vel_der;
-
-  if(speed > 0)
-  {
-    vel_izq = speed*(max_s-speed_0)/max + speed_0;
-    vel_der = speed*(speed_0-min_s)/min + speed_0;
-  }
-  else if(speed < 0) 
-  {
-    vel_izq = speed*(speed_0-min_s)/min + speed_0;
-    vel_der = speed*(max_s-speed_0)/max + speed_0;
-  }
-  else {
-    vel_izq = speed_0;
-    vel_der = speed_0;
-  }
-
-  Serial.println(vel_izq);
-  Serial.println(" - ");
-  Serial.println(vel_der);
-  Serial.println("\n");
-
-  analogWrite(pin_rueda_DER,vel_izq);   // DE 1 a 253 con el 100 como 0
-  analogWrite(pin_rueda_IZQ,vel_der);   // DE 1 a 253 con el 100 como 0
-}
-
-
-
-
-
 
 
 void setup() {
@@ -82,40 +40,40 @@ void loop() {
   value_izq = digitalRead(IR_IZQ);  //lectura digital de pin
   value_der = digitalRead(IR_DER);  //lectura digital de pin
 
-
-
-
-
+  // ULTRASONIDO
   digitalWrite(US_Trigger, HIGH);
   delayMicroseconds(10);          //Enviamos un pulso de 10us
   digitalWrite(US_Trigger, LOW);
   
-  t = pulseIn(US_Echo, HIGH); //obtenemos el ancho del pulso
-  d = t/59;             //
+  time_eco = pulseIn(US_Echo, HIGH); //obtenemos el ancho del pulso
+  dist = time_eco/59;             //
 
-  int ta = 1;
-  if(d < 11)
+  int free_path = 1;
+  if(dist < 11)
   {
-    ta = 0;
+    free_path = 0;
   }
 
- 
+  // SI HAY COLOR NEGRO EN LOS INFRARROJOS PARAMOS
   if(value_izq == 0 || value_der == 0)
   {
     myservoD.write(90);  // set servo to mid-point
     myservoI.write(90);  // set servo to mid-point
   }
+  // SI NO, NOS MOVEMOS
   else if(value_izq == 1 && value_der == 1)
   {
-    if(ta == 0)
+    // SI HAY OBSTACULO ATACAMOS
+    if(free_path == 0) // HAY OBSTACULO
     {
       Serial.print("Distancia: ");
-      Serial.print(d);      //Enviamos serialmente el valor de la distancia
+      Serial.print(dist);      //Enviamos serialmente el valor de la distancia
       Serial.print("cm");
       Serial.println();
       myservoD.write(180);  // set servo to mid-point
       myservoI.write(0);  // set servo to mid-point
     }
+    // SI NO, NOS MOVEMOS TRANQUILOS
     else{
       myservoD.write(110);  // set servo to mid-point
       myservoI.write(70);  // set servo to mid-point
