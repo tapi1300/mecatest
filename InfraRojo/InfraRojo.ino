@@ -1,4 +1,6 @@
-const int sensorPin = 11;
+const int sensorPin = 10;
+//const int sensorPin = 11;
+
 void setup() {
   Serial.begin(9600);   //iniciar puerto serie
   pinMode(sensorPin , INPUT);  //definir pin como entrada
