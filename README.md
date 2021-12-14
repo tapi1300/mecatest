@@ -1,2 +1,2 @@
 # mecatest
-Grupo individual para hacer individualizaciones
+Grupo individual para cosas de Mecatrónica
