@@ -12,6 +12,9 @@ long dist;
 bool parar=false;
 int time_init=0;
 int sens_detect=0;
+bool prev_iz = false;
+bool prev_der = false;
+
 
 Servo myservoD;
 Servo myservoI;
@@ -68,24 +71,37 @@ void loop() {
     // SI HAY OBSTACULO, PARAMOS    
     myservoD.write(90);
     myservoI.write(90);
-    digitalWrite(LED_BUILTIN, HIGH);
   }
   else {
-    digitalWrite(LED_BUILTIN, LOW);
     // SI HAY COLOR NEGRO EN LOS INFRARROJOS GIRAMOS
     if (value_izq == NEGRO){
-      myservoD.write(180);
-      myservoI.write(180);
-    }
-    else if(value_der == NEGRO){
-      myservoD.write(0);
-      myservoI.write(0);
-    }
-    // SI NO, NOS MOVEMOS
-    else if(value_izq == BLANCO && value_der == BLANCO)
-    {
+      prev_der = false;
+      if(prev_iz)
+      {
         myservoD.write(180);
+        myservoI.write(180);
+        digitalWrite(LED_BUILTIN, HIGH);
+      }
+      prev_iz = true;
+    }
+    if (value_der == NEGRO){
+      prev_iz = false;
+      if(prev_der)
+      {
+        myservoD.write(0);
         myservoI.write(0);
+        digitalWrite(LED_BUILTIN, LOW);
+      }
+      prev_der = true;
+    }
+
+    // SI NO, NOS MOVEMOS
+    if(value_izq == BLANCO && value_der == BLANCO)
+    {
+        prev_der = false;
+        prev_iz = false;
+        myservoD.write(110);
+        myservoI.write(70);
     }
   }
 }
